@@ -75,11 +75,15 @@ def filter_reviews(df: pd.DataFrame, url: str, rating_range) -> pd.DataFrame:
 
 def call_claude(reviews: list[str], business: str, filter_label: str) -> dict:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
+    if api_key:
+        st.write("DEBUG: API key loaded from environment variable.")
+    else:
         try:
             api_key = st.secrets["ANTHROPIC_API_KEY"]
-        except Exception:
-            pass
+            st.write("DEBUG: API key loaded from st.secrets.")
+        except Exception as e:
+            st.write(f"DEBUG: Failed to load API key from st.secrets — {e}")
+    st.write(f"DEBUG: api_key is {'set' if api_key else 'NOT SET'}")
     client = anthropic.Anthropic(api_key=api_key)
     numbered = "\n".join(f"[{i + 1}] {r}" for i, r in enumerate(reviews))
     prompt = f"""You are a consumer insights analyst. Below are {len(reviews)} Yelp reviews for \
